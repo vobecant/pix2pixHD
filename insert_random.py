@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
         # get video name and image name
         path, img_fname = os.path.split(mask_file)
-        img_name = os.path.splitext(img_fname)
+        img_name = os.path.splitext(img_fname)[0]
         vid_name = path.split(os.sep)[-1]
 
         mask = Image.open(mask_file)

@@ -131,13 +131,7 @@ if __name__ == '__main__':
     n_masks = len(masks2insert)
 
     # BACKGROUNDS
-    bg_dir = '/home/vobecant/datasets/YBB/background_vids/crops'
-    pattern = '*.png'
-    backgrounds = []
-    for dir, _, _ in os.walk(bg_dir):
-        backgrounds.extend(glob(os.path.join(dir, pattern)))
-        if len(backgrounds) > n_masks:
-            break
+    backgrounds = np.load('/home/vobecant/datasets/YBB/background_vids/crops/bg_train.npy')  # TODO: load from file!!!!
 
     print('Masks: {}, backgrounds: {}'.format(n_masks, len(backgrounds)))
 

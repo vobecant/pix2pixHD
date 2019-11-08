@@ -134,6 +134,8 @@ if __name__ == '__main__':
     backgrounds = []
     for dir, _, _ in os.walk(bg_dir):
         backgrounds.extend(glob(os.path.join(dir, pattern)))
+        if len(backgrounds)>n_masks:
+            break
 
     # test
     if not opt.engine and not opt.onnx:

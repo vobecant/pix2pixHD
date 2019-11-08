@@ -119,7 +119,9 @@ if __name__ == '__main__':
     webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.which_epoch))
 
     masks2insert = []
-    masks_dir = '/mnt/nas/data/GoogleBoundingBoxes/masks'
+    # masks_dir = '/mnt/nas/data/GoogleBoundingBoxes/masks'
+    masks_dir = '/home/vobecant/datasets/YBB/GAN_data/masks'
+
     pattern = "*.pbm"
 
     for dir, _, _ in os.walk(masks_dir):
@@ -134,8 +136,10 @@ if __name__ == '__main__':
     backgrounds = []
     for dir, _, _ in os.walk(bg_dir):
         backgrounds.extend(glob(os.path.join(dir, pattern)))
-        if len(backgrounds)>n_masks:
+        if len(backgrounds) > n_masks:
             break
+
+    print('Masks: {}, backgrounds: {}'.format(n_masks, len(backgrounds)))
 
     # test
     if not opt.engine and not opt.onnx:
@@ -156,7 +160,7 @@ if __name__ == '__main__':
     dataset_idx = 0
     dataset_iter = iter(dataset)
     while n_done < n_masks:
-        print('{}/{}'.format(n_done,n_masks-1))
+        print('{}/{}'.format(n_done, n_masks - 1))
         data = next(dataset_iter)
         if data is None:
             dataset_iter = iter(dataset)

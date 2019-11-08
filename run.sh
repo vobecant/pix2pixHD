@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=pix2pixhd_insertion
-#SBATCH --output=${pix2pixhd_insertion}.out
+#SBATCH --output=pix2pixhd_insertion.out
 #SBATCH --time=1-00:00:00
 #SBATCH --mem=30GB
 #SBATCH --gres=gpu:1

@@ -154,6 +154,7 @@ if __name__ == '__main__':
     dataset_idx = 0
     dataset_iter = iter(dataset)
     while n_done < n_masks:
+        print('{}/{}'.format(n_done,n_masks-1))
         data = next(dataset_iter)
         if data is None:
             dataset_iter = iter(dataset)
@@ -161,10 +162,12 @@ if __name__ == '__main__':
         mask_file = masks2insert[n_done]
         mask = Image.open(mask_file)
         background = Image.open(backgrounds[n_done])
+        print('\topened images')
 
         label_map_w_inserted, instance_map, bb_inserted = insert2label(mask, data['label'])
         data['label'] = label_map_w_inserted
         _, _, lbl_h, lbl_w = label_map_w_inserted.shape
+        print('\tinserted person')
 
         if opt.data_type == 16:
             data['label'] = data['label'].half()
@@ -189,7 +192,7 @@ if __name__ == '__main__':
         visuals = OrderedDict([('input_label', util.tensor2label(data['label'][0], opt.label_nc)),
                                ('synthesized_image', util.tensor2im(generated.data[0]))])
         img_path = data['path']
-        print('process image... %s' % img_path)
+        print('\tprocess image... %s' % img_path)
 
         synthesized_image = visuals['synthesized_image']
         im_h, im_w, _ = synthesized_image.shape
@@ -214,6 +217,8 @@ if __name__ == '__main__':
         background.paste(crop, (0, 0), cropped_mask)
         fname = os.path.join(save_dir_diffBg, '{}.png'.format(n_done))
         background.save(fname)
+
+        print('\saved crops')
 
         dataset_idx += 1
         if dataset_idx == dataset_size:

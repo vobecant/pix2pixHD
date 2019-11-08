@@ -40,7 +40,6 @@ def insert2label(mask_bin, orig_label_map, pedestrian_id=24, debug=False):
 
     instance_map.paste(mask_bin, (x, y), mask_bin)
     instance_map = instance_map.convert("L")
-    instance_map.save('inst_map_inserted.pbm')
 
     bb_inserted = (x, y, mask_w, mask_h)
 
@@ -116,9 +115,6 @@ if __name__ == '__main__':
     data_loader = CreateDataLoader(opt)
     dataset = data_loader.load_data()
     visualizer = Visualizer(opt)
-    # create website
-    web_dir = os.path.join(opt.results_dir, opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
-    webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.which_epoch))
 
     masks2insert = []
     # masks_dir = '/mnt/nas/data/GoogleBoundingBoxes/masks'
@@ -162,6 +158,12 @@ if __name__ == '__main__':
             dataset_iter = iter(dataset)
             data = next(dataset_iter)
         mask_file = masks2insert[n_done]
+
+        # get video name and image name
+        path, img_fname = os.path.split(mask_file)
+        img_name = os.path.splitext(img_fname)
+        vid_name = path.split(os.sep)[-1]
+
         mask = Image.open(mask_file)
         background = Image.open(backgrounds[n_done])
         print('\topened images')
@@ -209,25 +211,25 @@ if __name__ == '__main__':
         y += shift_y
         x, y, side = fit_to_image(x, y, crop_size, im_w=im_w, im_h=im_h)
         crop_params = (x, y, x + side, y + side)  # (left,upper,right,lower)
-        fname = os.path.join(save_dir_orig, '{}.png'.format(n_done))
+        save_dir_orig_vid = os.path.join(save_dir_orig, vid_name)
+        if not os.path.exists(save_dir_orig_vid):
+            os.makedirs(save_dir_orig_vid)
+        fname = os.path.join(save_dir_orig_vid, '{}.png'.format(img_name))
         crop = Image.fromarray(synthesized_image).crop(crop_params)
         crop.save(fname)
 
         # insert to different background
         cropped_mask = instance_map.crop(crop_params)
-        cropped_mask.save('cropped_mask.png')
-        print(cropped_mask.format)
         background.paste(crop, (0, 0), cropped_mask)
-        fname = os.path.join(save_dir_diffBg, '{}.png'.format(n_done))
+        save_dir_diffBg_vid = os.path.join(save_dir_diffBg, vid_name)
+        if not os.path.exists(save_dir_diffBg_vid):
+            os.makedirs(save_dir_diffBg_vid)
+        fname = os.path.join(save_dir_diffBg_vid, '{}.png'.format(img_name))
         background.save(fname)
 
-        print('\saved crops')
+        print('saved crops')
 
         dataset_idx += 1
         if dataset_idx == dataset_size:
             dataset_idx = 0
         n_done += 1
-        if n_done == 1:
-            break
-
-    webpage.save()

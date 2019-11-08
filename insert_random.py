@@ -215,7 +215,8 @@ if __name__ == '__main__':
 
         # insert to different background
         cropped_mask = instance_map.crop(crop_params)
-        cropped_mask.show()
+        cropped_mask.save('cropped_mask.png')
+        print(cropped_mask.format)
         background.paste(crop, (0, 0), cropped_mask)
         fname = os.path.join(save_dir_diffBg, '{}.png'.format(n_done))
         background.save(fname)

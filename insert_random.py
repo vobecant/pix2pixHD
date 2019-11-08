@@ -2,6 +2,7 @@ import os
 import sys
 from collections import OrderedDict
 from glob import glob
+from time import time
 
 from torch.autograd import Variable
 from torchvision.transforms import ToPILImage, ToTensor
@@ -104,7 +105,7 @@ if __name__ == '__main__':
     opt.no_flip = True  # no flip
     crop_size = 256
     max_shift = 64
-    save_dir = '/home/vobecant/datasets/pix2pixhd/crops'
+    save_dir = opt.save_dir
     save_dir_orig = os.path.join(save_dir, 'orig')
     save_dir_diffBg = os.path.join(save_dir, 'diffBg')
     if not os.path.exists(save_dir_orig):
@@ -130,6 +131,7 @@ if __name__ == '__main__':
 
     # BACKGROUNDS
     backgrounds = np.load('/home/vobecant/datasets/YBB/background_vids/crops/bg_train.npy')  # TODO: load from file!!!!
+    np.random.shuffle(backgrounds)
 
     print('Masks: {}, backgrounds: {}'.format(n_masks, len(backgrounds)))
 
@@ -151,10 +153,11 @@ if __name__ == '__main__':
     n_done = 0
     dataset_idx = 0
     dataset_iter = iter(dataset)
+    st = time()
     while n_done < n_masks:
-        print('{}/{}'.format(n_done, n_masks - 1))
-        data = next(dataset_iter)
-        if data is None:
+        try:
+            data = next(dataset_iter)
+        except:
             dataset_iter = iter(dataset)
             data = next(dataset_iter)
         mask_file = masks2insert[n_done]
@@ -166,12 +169,10 @@ if __name__ == '__main__':
 
         mask = Image.open(mask_file)
         background = Image.open(backgrounds[n_done])
-        print('\topened images')
 
         label_map_w_inserted, instance_map, bb_inserted = insert2label(mask, data['label'])
         data['label'] = label_map_w_inserted
         _, _, lbl_h, lbl_w = label_map_w_inserted.shape
-        print('\tinserted person')
 
         if opt.data_type == 16:
             data['label'] = data['label'].half()
@@ -196,7 +197,7 @@ if __name__ == '__main__':
         visuals = OrderedDict([('input_label', util.tensor2label(data['label'][0], opt.label_nc)),
                                ('synthesized_image', util.tensor2im(generated.data[0]))])
         img_path = data['path']
-        print('\tprocess image... %s' % img_path)
+        # print('\tprocess image... %s' % img_path)
 
         synthesized_image = visuals['synthesized_image']
         im_h, im_w, _ = synthesized_image.shape
@@ -227,9 +228,11 @@ if __name__ == '__main__':
         fname = os.path.join(save_dir_diffBg_vid, '{}.png'.format(img_name))
         background.save(fname)
 
-        print('saved crops')
-
         dataset_idx += 1
         if dataset_idx == dataset_size:
             dataset_idx = 0
         n_done += 1
+
+        if n_done % 100 == 0:
+            elapsed = time() - st
+            print('{}/{} done in {:.1f}s'.format(n_done, n_masks, elapsed))

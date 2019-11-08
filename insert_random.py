@@ -39,6 +39,7 @@ def insert2label(mask_bin, orig_label_map, pedestrian_id=24, debug=False):
     orig_label_map = TOTENSOR(orig_label_map).unsqueeze(0)
 
     instance_map.paste(mask_bin, (x, y), mask_bin)
+    instance_map = instance_map.convert("L")
 
     bb_inserted = (x, y, mask_w, mask_h)
 

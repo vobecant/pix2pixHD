@@ -1,6 +1,11 @@
 import os
+import sys
 from collections import OrderedDict
+from glob import glob
+
 from torch.autograd import Variable
+from torchvision.transforms import ToPILImage, ToTensor
+
 from options.test_options import TestOptions
 from data.data_loader import CreateDataLoader
 from models.models import create_model
@@ -12,25 +17,32 @@ import numpy as np
 from PIL import Image
 import random
 
+TOPIL = ToPILImage()
+TOTENSOR = ToTensor()
 
-def insert2label(mask_bin, orig_label_map, pedestrian_id=24):
+
+def insert2label(mask_bin, orig_label_map, pedestrian_id=24, debug=False):
     mask_npy = np.asarray(mask_bin)
-    mask_pedId = mask * pedestrian_id
+    mask_pedId = (mask_npy * pedestrian_id).astype(np.uint8)
     mask2insert = Image.fromarray(mask_pedId)
-    mask_w, mask_h = masks2insert.size
+    mask_w, mask_h = mask2insert.size
 
-    im_h, im_w, _ = orig_label_map.shape
+    orig_label_map_npy = orig_label_map.squeeze().cpu().numpy()
+    instance_map = Image.fromarray(np.zeros_like(orig_label_map_npy))
+    im_h, im_w = orig_label_map_npy.shape
     max_w = im_w - mask_w
     max_h = im_h - mask_h
     x, y = random.randrange(0, max_w), random.randrange(0, max_h)
 
-    orig_label_map = Image.fromarray(orig_label_map)
-    orig_label_map = orig_label_map.paste(mask2insert, (x, y), mask_bin)
-    orig_label_map = np.asarray(orig_label_map)
+    orig_label_map = Image.fromarray(orig_label_map_npy)
+    orig_label_map.paste(mask2insert, (x, y), mask_bin)
+    orig_label_map = TOTENSOR(orig_label_map).unsqueeze(0)
+
+    instance_map.paste(mask_bin, (x, y), mask_bin)
 
     bb_inserted = (x, y, mask_w, mask_h)
 
-    return orig_label_map, bb_inserted
+    return orig_label_map, instance_map, bb_inserted
 
 
 def fit_to_image(x, y, side, im_w, im_h):
@@ -92,8 +104,12 @@ if __name__ == '__main__':
     crop_size = 256
     max_shift = 64
     save_dir = '/home/vobecant/datasets/pix2pixhd/crops'
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    save_dir_orig = os.path.join(save_dir, 'orig')
+    save_dir_diffBg = os.path.join(save_dir, 'diffBg')
+    if not os.path.exists(save_dir_orig):
+        os.makedirs(save_dir_orig)
+    if not os.path.exists(save_dir_diffBg):
+        os.makedirs(save_dir_diffBg)
 
     data_loader = CreateDataLoader(opt)
     dataset = data_loader.load_data()
@@ -102,8 +118,22 @@ if __name__ == '__main__':
     web_dir = os.path.join(opt.results_dir, opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
     webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.which_epoch))
 
-    masks2insert = np.load('')['mask_paths']
+    masks2insert = []
+    masks_dir = '/mnt/nas/data/GoogleBoundingBoxes/masks'
+    pattern = "*.pbm"
+
+    for dir, _, _ in os.walk(masks_dir):
+        masks2insert.extend(glob(os.path.join(dir, pattern)))
+
+    # masks2insert = np.load('')['mask_paths']
     n_masks = len(masks2insert)
+
+    # BACKGROUNDS
+    bg_dir = '/home/vobecant/datasets/YBB/background_vids/crops'
+    pattern = '*.png'
+    backgrounds = []
+    for dir, _, _ in os.walk(bg_dir):
+        backgrounds.extend(glob(os.path.join(dir, pattern)))
 
     # test
     if not opt.engine and not opt.onnx:
@@ -122,14 +152,19 @@ if __name__ == '__main__':
 
     n_done = 0
     dataset_idx = 0
+    dataset_iter = iter(dataset)
     while n_done < n_masks:
-        data = dataset.__getitem__(dataset_idx)
+        data = next(dataset_iter)
+        if data is None:
+            dataset_iter = iter(dataset)
+            data = next(dataset_iter)
         mask_file = masks2insert[n_done]
-        mask = Image.open(mask_file).convert("L")
+        mask = Image.open(mask_file)
+        background = Image.open(backgrounds[n_done])
 
-        label_map_w_inserted, bb_inserted = insert2label(mask, data['label'])
+        label_map_w_inserted, instance_map, bb_inserted = insert2label(mask, data['label'])
         data['label'] = label_map_w_inserted
-        lbl_h, lbl_w, _ = label_map_w_inserted.shape
+        _, _, lbl_h, lbl_w = label_map_w_inserted.shape
 
         if opt.data_type == 16:
             data['label'] = data['label'].half()
@@ -169,13 +204,22 @@ if __name__ == '__main__':
         y += shift_y
         x, y, side = fit_to_image(x, y, crop_size, im_w=im_w, im_h=im_h)
         crop_params = (x, y, x + side, y + side)  # (left,upper,right,lower)
-        fname = os.path.join(save_dir, '{}.png'.format(n_done))
+        fname = os.path.join(save_dir_orig, '{}.png'.format(n_done))
         crop = Image.fromarray(synthesized_image).crop(crop_params)
         crop.save(fname)
+
+        # insert to different background
+        cropped_mask = instance_map.crop(crop_params)
+        cropped_mask.show()
+        background.paste(crop, (0, 0), cropped_mask)
+        fname = os.path.join(save_dir_diffBg, '{}.png'.format(n_done))
+        background.save(fname)
 
         dataset_idx += 1
         if dataset_idx == dataset_size:
             dataset_idx = 0
         n_done += 1
+        if n_done == 1:
+            break
 
     webpage.save()

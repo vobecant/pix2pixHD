@@ -40,6 +40,7 @@ def insert2label(mask_bin, orig_label_map, pedestrian_id=24, debug=False):
 
     instance_map.paste(mask_bin, (x, y), mask_bin)
     instance_map = instance_map.convert("L")
+    instance_map.save('inst_map_inserted.pbm')
 
     bb_inserted = (x, y, mask_w, mask_h)
 

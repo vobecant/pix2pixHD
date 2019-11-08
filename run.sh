@@ -8,7 +8,7 @@
 #SBATCH --partition=gpu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=a.vobecky@gmail.com
-cd ${BASE_SAVE_DIR}
+
 python -u insert_random.py \
         --name label2city_1024p --netG local --ngf 32 --resize_or_crop none \
         --dataroot /home/vobecant/datasets/cityscapes/ > pix2pixhd_insertion.out

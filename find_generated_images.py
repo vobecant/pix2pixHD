@@ -16,7 +16,6 @@ if __name__ == '__main__':
     all_files_by_vid = {}
 
     for d in dirs:
-        d = os.path.join(d, 'images')
         files_dir = []
         for root, dirs, files in os.walk(d):
             for file in files:

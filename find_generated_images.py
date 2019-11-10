@@ -84,4 +84,5 @@ if __name__ == '__main__':
 
         print('Found {} images belonging to cluster {}'.format(len(clustered[i]), i))
 
-    np.save('/home/vobecant/datasets/YBB/generated/pix2pixhd_clusters_train_class.npy', clustered)
+    with open('/home/vobecant/datasets/YBB/generated/pix2pixhd_clusters_train_class.npy', 'wb') as f:
+        pickle.dump(clustered, f)

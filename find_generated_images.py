@@ -6,6 +6,7 @@ import pickle
 import json
 
 if __name__ == '__main__':
+    '''
     dirname_pattern = 'run'
     base_dir = '/home/vobecant/datasets/pix2pixhd/crops'
     dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) if
@@ -34,13 +35,14 @@ if __name__ == '__main__':
     np.save('/home/vobecant/datasets/YBB/generated/pix2pixhd_paths.npy', all_files)
     with open('/home/vobecant/datasets/YBB/generated/pix2pixhd_paths_by_vid.npy', 'wb') as f:
         pickle.dump(all_files_by_vid, f)
+    '''
 
     all_files = np.load('/home/vobecant/datasets/YBB/generated/pix2pixhd_paths.npy')
     with open('/home/vobecant/datasets/YBB/generated/pix2pixhd_paths_by_vid.npy', 'rb') as f:
         all_files_by_vid = pickle.load(f)
     print('Length of all files: {}'.format(len(all_files)))
     registered_videos = all_files_by_vid.keys()
-    print('Registered videos: {}'.format(registered_videos))
+    # print('Registered videos: {}'.format(registered_videos))
 
     # cluster the data
     path = '/home/vobecant/datasets/YBB/GAN_data/splits/2019-11-05_unique_vid/clust_to_pers_map_class.json'
@@ -48,12 +50,6 @@ if __name__ == '__main__':
 
     with open(path, 'r') as infile:
         clust_to_pers_map = json.load(infile)
-
-    # clust_to_pers_map_class['clusters'] = [] - here are lists with video names, frame numbers and person IDs, num_of_samples for every cluster
-    # clust_to_pers_map_class['target_distribution'] = Base64Encode(target_distribution) - can be decoded and used if needed
-    # clust_to_pers_map_class['trn_distribution'] = Base64Encode(trn_distribution) - can be decoded and used if needed
-    # clust_to_pers_map_class['tst_distribution'] = Base64Encode(tst_distribution) - can be decoded and used if needed
-    # clust_to_pers_map['clusters'] consists of following lists {'video_name': [], 'frame_num': [], 'person_id': [], 'num_samples': 0}
 
     for i in range(len(clust_to_pers_map['clusters'])):
         print('----------------------------------------------------------------------------------------------------')
@@ -84,5 +80,5 @@ if __name__ == '__main__':
 
         print('Found {} images belonging to cluster {}'.format(len(clustered[i]), i))
 
-    with open('/home/vobecant/datasets/YBB/generated/pix2pixhd_clusters_train_class.npy', 'wb') as f:
-        pickle.dump(clustered, f)
+    #with open('/home/vobecant/datasets/YBB/generated/pix2pixhd_clusters_train_class.npy', 'wb') as f:
+    #    pickle.dump(clustered, f)

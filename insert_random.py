@@ -136,7 +136,7 @@ if __name__ == '__main__':
     # BACKGROUNDS
     # backgrounds = np.load('/home/vobecant/datasets/YBB/background_vids/crops/bg_train.npy')  # TODO: load from file!!!!
     bg_dir = '/home/vobecant/datasets/cityscapes/eccv2020/negative_crops/train/full'
-    backgrounds = np.asarray([os.path.join(bg_dir, bg) for bg in os.listdir(bg_dir)])
+    backgrounds = np.asarray([os.path.join(bg_dir, bg) for bg in os.listdir(bg_dir) if '256' in bg])
     np.random.shuffle(backgrounds)
     backgrounds = backgrounds[:N_BGS]
 

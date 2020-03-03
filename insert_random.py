@@ -20,6 +20,10 @@ import random
 
 TOPIL = ToPILImage()
 TOTENSOR = ToTensor()
+N_BGS = 15000
+np.random.seed(42)
+np.random.set_state(42)
+random.seed(42)
 
 
 def insert2label(mask_bin, orig_label_map, pedestrian_id=24, debug=False):
@@ -127,11 +131,15 @@ if __name__ == '__main__':
         masks2insert.extend(glob(os.path.join(dir, pattern)))
 
     # masks2insert = np.load('')['mask_paths']
+    masks2insert = masks2insert[:N_BGS]
     n_masks = len(masks2insert)
 
     # BACKGROUNDS
-    backgrounds = np.load('/home/vobecant/datasets/YBB/background_vids/crops/bg_train.npy')  # TODO: load from file!!!!
+    # backgrounds = np.load('/home/vobecant/datasets/YBB/background_vids/crops/bg_train.npy')  # TODO: load from file!!!!
+    bg_dir = '/home/vobecant/datasets/cityscapes/eccv2020/negative_crops/train/full'
+    backgrounds = np.asarray([os.path.join(bg_dir, bg) for bg in os.listdir(bg_dir)])
     np.random.shuffle(backgrounds)
+    backgrounds = backgrounds[:N_BGS]
 
     print('Masks: {}, backgrounds: {}'.format(n_masks, len(backgrounds)))
 

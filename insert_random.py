@@ -111,6 +111,7 @@ if __name__ == '__main__':
     save_dir = opt.save_dir
     save_dir_orig = os.path.join(save_dir, 'orig')
     save_dir_diffBg = os.path.join(save_dir, 'diffBg')
+    save_dir_crop = os.path.join(save_dir,'crop')
     if not os.path.exists(save_dir_orig):
         os.makedirs(save_dir_orig)
     if not os.path.exists(save_dir_diffBg):
@@ -224,15 +225,11 @@ if __name__ == '__main__':
             os.makedirs(save_dir_orig_vid)
         fname = os.path.join(save_dir_orig_vid, '{}.png'.format(img_name))
         crop = Image.fromarray(synthesized_image).crop(crop_params)
-        crop.save(fname)
 
         # insert to different background
         cropped_mask = instance_map.crop(crop_params)
         background.paste(crop, (0, 0), cropped_mask)
-        save_dir_diffBg_vid = os.path.join(save_dir_diffBg, vid_name)
-        if not os.path.exists(save_dir_diffBg_vid):
-            os.makedirs(save_dir_diffBg_vid)
-        fname = os.path.join(save_dir_diffBg_vid, '{}.png'.format(img_name))
+        fname = os.path.join(save_dir_crop, '{}.png'.format(img_name))
         background.save(fname)
 
         dataset_idx += 1

@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # backgrounds = np.load('/home/vobecant/datasets/YBB/background_vids/crops/bg_train.npy')  # TODO: load from file!!!!
     bg_dir = '/home/vobecant/datasets/cityscapes/eccv2020/negative_crops/train/full'
     backgrounds = np.asarray([os.path.join(bg_dir, bg) for bg in os.listdir(bg_dir) if '256' in bg])
-    np.random.shuffle(backgrounds)
+    # np.random.shuffle(backgrounds)
     backgrounds = backgrounds[:N_BGS]
 
     print('Masks: {}, backgrounds: {}'.format(n_masks, len(backgrounds)))
@@ -174,11 +174,13 @@ if __name__ == '__main__':
 
         # get video name and image name
         path, img_fname = os.path.split(mask_file)
-        img_name = os.path.splitext(img_fname)[0]
+        bg_path = backgrounds[n_done]
+        bg_name = os.path.split(bg_path)[1]
+        img_name = bg_name
         vid_name = path.split(os.sep)[-1]
 
         mask = Image.open(mask_file)
-        background = Image.open(backgrounds[n_done])
+        background = Image.open(bg_path)
 
         label_map_w_inserted, instance_map, bb_inserted = insert2label(mask, data['label'])
         data['label'] = label_map_w_inserted

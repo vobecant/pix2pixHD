@@ -22,7 +22,6 @@ TOPIL = ToPILImage()
 TOTENSOR = ToTensor()
 N_BGS = 15000
 np.random.seed(42)
-np.random.set_state(42)
 random.seed(42)
 
 

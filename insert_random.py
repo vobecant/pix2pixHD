@@ -233,7 +233,7 @@ if __name__ == '__main__':
         # insert to different background
         cropped_mask = instance_map.crop(crop_params)
         background.paste(crop, (0, 0), cropped_mask)
-        fname = os.path.join(save_dir_crop, '{}.png'.format(img_name))
+        fname = os.path.join(save_dir_crop, img_name)
         background.save(fname)
 
         dataset_idx += 1

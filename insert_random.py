@@ -111,11 +111,13 @@ if __name__ == '__main__':
     save_dir = opt.save_dir
     save_dir_orig = os.path.join(save_dir, 'orig')
     save_dir_diffBg = os.path.join(save_dir, 'diffBg')
-    save_dir_crop = os.path.join(save_dir,'crop')
+    save_dir_crop = os.path.join(save_dir, 'crop')
     if not os.path.exists(save_dir_orig):
         os.makedirs(save_dir_orig)
     if not os.path.exists(save_dir_diffBg):
         os.makedirs(save_dir_diffBg)
+    if not os.path.exists(save_dir_crop):
+        os.makedirs(save_dir_crop)
 
     data_loader = CreateDataLoader(opt)
     dataset = data_loader.load_data()

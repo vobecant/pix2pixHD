@@ -3,6 +3,7 @@ import sys
 from collections import OrderedDict
 from glob import glob
 from time import time
+import pickle
 
 from torch.autograd import Variable
 from torchvision.transforms import ToPILImage, ToTensor
@@ -139,9 +140,11 @@ if __name__ == '__main__':
     # BACKGROUNDS
     # backgrounds = np.load('/home/vobecant/datasets/YBB/background_vids/crops/bg_train.npy')  # TODO: load from file!!!!
     bg_dir = '/home/vobecant/datasets/cityscapes/eccv2020/negative_crops/train/full'
-    backgrounds = np.asarray([os.path.join(bg_dir, bg) for bg in os.listdir(bg_dir) if '256' in bg])
+    backgrounds = [os.path.join(bg_dir, bg) for bg in os.listdir(bg_dir) if '256' in bg]
     # np.random.shuffle(backgrounds)
     backgrounds = backgrounds[:N_BGS]
+    with open(os.path.join(save_dir, 'choosen_bgs.pkl'), 'wb') as f:
+        pickle.dump(backgrounds, f)
 
     print('Masks: {}, backgrounds: {}'.format(n_masks, len(backgrounds)))
 

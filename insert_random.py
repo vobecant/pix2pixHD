@@ -192,7 +192,7 @@ if __name__ == '__main__':
         img_name = bg_name
         vid_name = path.split(os.sep)[-1]
 
-        mask = Image.open(mask_file)
+        mask = Image.open(mask_file).resize((256,256),resample=Image.NEAREST)
         background = Image.open(bg_path)
 
         label_map_w_inserted, instance_map, bb_inserted = insert2label(mask, data['label'])

@@ -156,7 +156,7 @@ if __name__ == '__main__':
     with open(os.path.join(save_dir, 'choosen_bgs.pkl'), 'wb') as f:
         pickle.dump(backgrounds, f)
 
-    print('Masks: {} (unique {}), backgrounds: {}'.format(n_masks, masks2insert_tmp, len(backgrounds)))
+    print('Masks: {} (unique {}), backgrounds: {}'.format(n_masks, len(masks2insert_tmp), len(backgrounds)))
 
     # test
     if not opt.engine and not opt.onnx:

@@ -21,7 +21,7 @@ import random
 
 TOPIL = ToPILImage()
 TOTENSOR = ToTensor()
-N_BGS = 15000
+N_BGS = 5000
 np.random.seed(42)
 random.seed(42)
 
@@ -130,8 +130,18 @@ if __name__ == '__main__':
 
     pattern = "*.pbm"
 
-    for dir, _, _ in os.walk(masks_dir):
-        masks2insert.extend(glob(os.path.join(dir, pattern)))
+    # for dir, _, _ in os.walk(masks_dir):
+    #    masks2insert.extend(glob(os.path.join(dir, pattern)))
+
+    masks_file = '/home/vobecant/datasets/cityscapes/eccv2020/positive_crops/train/train_real100pos_masks.pkl'
+    with open(masks_file, 'rb') as f:
+        masks2insert_tmp = pickle.load(f)
+        masks2insert_tmp = [m for m in masks2insert_tmp if os.path.exists(m)]
+
+    print('Found {} masks.'.format(len(masks2insert_tmp)))
+
+    while len(masks2insert) < 5000:
+        masks2insert = masks2insert + random.sample(masks2insert_tmp, len(masks2insert_tmp))
 
     # masks2insert = np.load('')['mask_paths']
     masks2insert = masks2insert[:N_BGS]
